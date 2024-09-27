@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: controller
+            uri: http://localhost:8081
+            predicates:
+              - Path=/student/**
