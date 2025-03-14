@@ -1,49 +1,32 @@
 package com.gateway.controller;
 
-import lombok.Data;
+import com.gateway.securityConfig.AuthDto;
+import com.gateway.securityConfig.AuthService;
+import com.gateway.securityConfig.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("auth")
 public class SecurityController {
 
-    private final AuthenticationManager authenticationManager;
+    private final AuthService service;
 
     @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(),
-                            loginRequest.getPassword()
-                    )
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            return ResponseEntity.ok().body("Login successful");
-        } catch (AuthenticationException e) {
-            return ResponseEntity.status(401).body("Unauthorized");
-        }
+    public ResponseEntity<Map<String,String>> authenticateUser(@RequestBody AuthDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.attemptLogin(dto));
     }
 
-    @PostMapping("/test")
-    public ResponseEntity<String> authenticateUser() {
-        System.out.println("login hit..................");
-        return ResponseEntity.ok().body("Login successful");
+    @PostMapping("/register")
+    public ResponseEntity<UserEntity> register(@RequestBody UserEntity dto) {
+        return ResponseEntity.ok().body(service.register(dto));
     }
-}
-
-@Data
-class LoginRequest {
-    private String username;
-    private String password;
 }
